@@ -1,0 +1,6 @@
+- Account on scool tenant meant that I can't crate a app registration
+- Create app registration
+- GHCR.io with azure
+- set subscription
+- register namespace microsoft.app
+- Manual registration for hpedersen.no
