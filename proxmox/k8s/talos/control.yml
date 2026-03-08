@@ -1,0 +1,4 @@
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: 10.0.0.2  # IP address to be advertised as a Layer 2 VIP.
+link: eth0 # Name of the link to assign the VIP to.

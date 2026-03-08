@@ -1,3 +1,7 @@
+variable "name" {
+  type = string
+}
+
 variable "network_bridge" {
   type = string
 }
@@ -7,7 +11,7 @@ variable "disk_import_id" {
 }
 
 resource "proxmox_virtual_environment_vm" "k8s_vm" {
-  name        = "talos-k8s-vm"
+  name        = var.name
   description = "Managed by Terraform"
   tags        = ["terraform", "k8s"]
 
@@ -50,4 +54,8 @@ resource "proxmox_virtual_environment_vm" "k8s_vm" {
 
 output "k8s_vm_ip" {
   value = proxmox_virtual_environment_vm.k8s_vm.ipv4_addresses
+}
+
+output "name" {
+  value = var.name
 }
