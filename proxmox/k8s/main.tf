@@ -96,8 +96,8 @@ module "talos_worker" {
 }
 
 locals {
-  manager_ips = {for vm in range(3) :  "${module.talos_manager[vm].name}" => [for ip in flatten(flatten(module.talos_manager[vm].k8s_vm_ip)) : ip if ip != "127.0.0.1" || ip != "169.254.116.108"][0]}
-  worker_ips =  {for vm in range(3) : "${module.talos_worker[vm].name}" => [for ip in flatten(flatten(module.talos_worker[vm].k8s_vm_ip)) : ip if ip != "127.0.0.1" || ip != "169.254.116.108"][0]}
+  manager_ips = {for vm in range(3) :  "${module.talos_manager[vm].name}" => [for ip in flatten(flatten(module.talos_manager[vm].k8s_vm_ip)) : ip if ip != "127.0.0.1" && ip != "169.254.116.108"][0]}
+  worker_ips =  {for vm in range(3) : "${module.talos_worker[vm].name}" => [for ip in flatten(flatten(module.talos_worker[vm].k8s_vm_ip)) : ip if ip != "127.0.0.1" && ip != "169.254.116.108"][0]}
 }
 
 output "manager_ips" {
