@@ -5,12 +5,14 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
+    nixarr.url = "github:nix-media-server/nixarr";
   };
 
   outputs = {
     nixpkgs,
     disko,
     sops-nix,
+    nixarr,
     ...
   }: {
     nixosConfigurations = let
@@ -30,6 +32,7 @@
             modules = [
               disko.nixosModules.disko
               sops-nix.nixosModules.sops
+              nixarr.nixosModules.nixarr
               ./common.nix
               (./hosts + "/${host}/configuration.nix")
             ];

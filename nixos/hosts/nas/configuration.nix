@@ -12,6 +12,55 @@
   sops.age.sshKeyPaths = ["/id_ed25519"];
   # This is the actual specification of the secrets.
   sops.secrets."wireguard/private_key" = {};
+  sops.secrets.protonvpn = {};
+
+  nixarr = {
+    enable = true;
+    # These two values are also the default, but you can set them to whatever
+    # else you want
+    # WARNING: Do _not_ set them to `/home/user/whatever`, it will not work!
+    mediaDir = "/data/media";
+    stateDir = "/data/media/.state/nixarr";
+
+    vpn = {
+      enable = true;
+      # WARNING: This file must _not_ be in the config git directory
+      # You can usually get this wireguard file from your VPN provider
+      wgConf = config.sops.secrets.protonvpn.path;
+    };
+
+    jellyfin = {
+      enable = true;
+      openFirewall = true;
+    };
+
+    transmission = {
+      enable = true;
+      vpn.enable = true;
+      peerPort = 51820;
+    };
+
+    # It is possible for this module to run the *Arrs through a VPN, but it
+    # is generally not recommended, as it can cause rate-limiting issues.
+    bazarr.enable = true;
+    lidarr.enable = true;
+    prowlarr = {
+      enable = true;
+      openFirewall = true;
+    };
+    radarr = {
+      enable = true;
+      openFirewall = true;
+    };
+    sonarr = {
+      enable = true;
+      openFirewall = true;
+    };
+    seerr = {
+      enable = true;
+      openFirewall = true;
+    };
+  };
 
   systemd.tmpfiles.settings = {
     "10-mypackage" = {
@@ -33,7 +82,7 @@
   };
 
   networking.wireguard.interfaces = {
-    wg0 = {
+    wg1 = {
       ips = ["10.50.0.1/24"];
       listenPort = 51820;
 
