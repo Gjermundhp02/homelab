@@ -32,7 +32,7 @@
             modules = [
               disko.nixosModules.disko
               sops-nix.nixosModules.sops
-              nixarr.nixosModules.nixarr
+              nixarr.nixosModules.default
               ./common.nix
               (./hosts + "/${host}/configuration.nix")
             ];
