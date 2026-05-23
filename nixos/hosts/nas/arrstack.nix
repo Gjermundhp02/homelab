@@ -1,4 +1,9 @@
-{config, pkgs, lib, ...}: {
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}: {
   sops.defaultSopsFile = ./secrets/secrets.yaml;
   sops.age.sshKeyPaths = ["/id_ed25519"];
   sops.secrets.tailscale_key = {};
@@ -79,12 +84,19 @@
   systemd.network.wait-online.enable = false;
   boot.initrd.systemd.network.wait-online.enable = false;
 
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      intel-media-driver # For Intel QuickSync (QSV) / Modern iHD driver
+    ];
+  };
+
   networking.firewall = {
     trustedInterfaces = ["tailscale0"];
     allowedUDPPorts = [config.services.tailscale.port];
   };
 
-  services.caddy = let 
+  services.caddy = let
     hosts = {
       radarr = "7878";
       sonarr = "8989";
@@ -93,7 +105,7 @@
       jellyfin = "8096";
       jellyseerr = "5055";
     };
-  in{
+  in {
     enable = true;
     globalConfig = ''
       acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
@@ -102,13 +114,15 @@
       plugins = [
         "github.com/caddy-dns/cloudflare@v0.2.4"
       ];
-      hash= "sha256-uKtStb6m1/hA5IaAdIyLGzAQdyIySjISdxXIRxehhyI=";
+      hash = "sha256-uKtStb6m1/hA5IaAdIyLGzAQdyIySjISdxXIRxehhyI=";
     };
-    virtualHosts = lib.mapAttrs' (host: port: lib.nameValuePair (host + ".hpedersen.no") {
-      extraConfig = ''
-        reverse_proxy 127.0.0.1:${port}
-      '';
-    }) hosts;
+    virtualHosts = lib.mapAttrs' (host: port:
+      lib.nameValuePair (host + ".hpedersen.no") {
+        extraConfig = ''
+          reverse_proxy 127.0.0.1:${port}
+        '';
+      })
+    hosts;
   };
-  systemd.services.caddy.serviceConfig.EnvironmentFile = [ config.sops.secrets.cloudflare.path ];
+  systemd.services.caddy.serviceConfig.EnvironmentFile = [config.sops.secrets.cloudflare.path];
 }
