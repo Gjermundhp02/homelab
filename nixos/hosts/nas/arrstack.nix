@@ -59,7 +59,7 @@
     };
   };
   services.transmission.settings = {
-    rpc-host-whitelist = "nas.tail7cc95a.ts.net,localhost,127.0.0.1";
+    rpc-host-whitelist = "transmission.hpedersen.no,localhost,127.0.0.1";
   };
 
   services.flaresolverr.enable = true;
