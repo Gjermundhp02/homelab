@@ -1,7 +1,10 @@
-{config, host, ...}: {
+{config, pkgs, lib, ...}: {
   sops.defaultSopsFile = ./secrets/secrets.yaml;
   sops.age.sshKeyPaths = ["/id_ed25519"];
   sops.secrets.tailscale_key = {};
+  sops.secrets.cloudflare = {
+    owner = "caddy";
+  };
 
   nixarr = {
     enable = true;
@@ -81,8 +84,31 @@
     allowedUDPPorts = [config.services.tailscale.port];
   };
 
-  services.caddy = {
+  services.caddy = let 
+    hosts = {
+      radarr = "7878";
+      sonarr = "8989";
+      prowlarr = "9696";
+      transmission = "9091";
+      jellyfin = "8096";
+      jellyseerr = "5055";
+    };
+  in{
     enable = true;
-    virtualHosts."${host}.tail7cc95a.ts.net".extraConfig = builtins.readFile ./Caddyfile;
+    globalConfig = ''
+      acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+    '';
+    package = pkgs.caddy.withPlugins {
+      plugins = [
+        "github.com/caddy-dns/cloudflare@v0.2.4"
+      ];
+      hash= "sha256-uKtStb6m1/hA5IaAdIyLGzAQdyIySjISdxXIRxehhyI=";
+    };
+    virtualHosts = lib.mapAttrs' (host: port: lib.nameValuePair (host + ".hpedersen.no") {
+      extraConfig = ''
+        reverse_proxy 127.0.0.1:${port}
+      '';
+    }) hosts;
   };
+  systemd.services.caddy.serviceConfig.EnvironmentFile = [ config.sops.secrets.cloudflare.path ];
 }
