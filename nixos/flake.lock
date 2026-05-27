@@ -28,15 +28,16 @@
         "website-builder": "website-builder"
       },
       "locked": {
-        "lastModified": 1778346734,
-        "narHash": "sha256-G5ZyrISExI0L6CqHX/0CrdTVEu9lpIdevhpkYwhGf/E=",
-        "owner": "nix-media-server",
+        "lastModified": 1779913453,
+        "narHash": "sha256-UHH0UA6l9Af0ajHgiXnUr0OqFHjd0/xS30xppKpTdUk=",
+        "owner": "Gjermundhp02",
         "repo": "nixarr",
-        "rev": "476ffae2a09911008847dd5a86c18b8cb484d198",
+        "rev": "676eaf27934f0148d4a6dd1a19c0169a4d63cc53",
         "type": "github"
       },
       "original": {
-        "owner": "nix-media-server",
+        "owner": "Gjermundhp02",
+        "ref": "wip-natpmp",
         "repo": "nixarr",
         "type": "github"
       }

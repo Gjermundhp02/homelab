@@ -5,7 +5,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
-    nixarr.url = "github:nix-media-server/nixarr";
+    nixarr.url = "github:Gjermundhp02/nixarr/wip-natpmp";
   };
 
   outputs = {

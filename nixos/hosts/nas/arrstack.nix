@@ -24,6 +24,8 @@
       # WARNING: This file must _not_ be in the config git directory
       # You can usually get this wireguard file from your VPN provider
       wgConf = config.sops.secrets.protonvpn.path;
+      natPmp.enable = true;
+      natPmp.providerIP = "10.2.0.1";
     };
 
     jellyfin = {
@@ -34,7 +36,7 @@
     transmission = {
       enable = true;
       vpn.enable = true;
-      peerPort = 51820;
+      vpn.enableNATPmp = true;
     };
 
     # It is possible for this module to run the *Arrs through a VPN, but it
