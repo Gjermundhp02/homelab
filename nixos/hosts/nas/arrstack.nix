@@ -90,6 +90,7 @@
       intel-media-driver # For Intel QuickSync (QSV) / Modern iHD driver
     ];
   };
+  users.users.jellyfin.extraGroups = [ "video" "render" ];
 
   networking.firewall = {
     trustedInterfaces = ["tailscale0"];
