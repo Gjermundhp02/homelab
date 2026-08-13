@@ -5,6 +5,7 @@
   imports = [
     ./hardware-configuration.nix
     ./arrstack.nix
+    ./microvm.nix
   ];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;

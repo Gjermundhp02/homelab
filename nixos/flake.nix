@@ -6,6 +6,10 @@
     sops-nix.url = "github:Mic92/sops-nix";
     sops-nix.inputs.nixpkgs.follows = "nixpkgs";
     nixarr.url = "github:Gjermundhp02/nixarr/wip-natpmp";
+    microvm = {
+      url = "github:microvm-nix/microvm.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -13,6 +17,7 @@
     disko,
     sops-nix,
     nixarr,
+    microvm,
     ...
   }: {
     nixosConfigurations = let
@@ -33,6 +38,7 @@
               disko.nixosModules.disko
               sops-nix.nixosModules.sops
               nixarr.nixosModules.default
+              microvm.nixosModules.host
               ./common.nix
               (./hosts + "/${host}/configuration.nix")
             ];
