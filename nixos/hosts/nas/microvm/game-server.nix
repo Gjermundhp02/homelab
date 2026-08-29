@@ -6,6 +6,16 @@
   minecraftEnvFile = config.sops.secrets.minecraft.path;
   playitEnvFile = config.sops.secrets.playit.path;
 in {
+
+  sops.secrets.minecraft = {
+    sopsFile = ../secrets/game-server/minecraft.env;
+    format = "dotenv";
+  };
+
+  sops.secrets.playit = {
+    sopsFile = ../secrets/game-server/game-server.yaml;
+  };
+
   systemd.tmpfiles.rules = [
     "d /var/lib/microvms 0755 root root -"
     "d /var/lib/microvms/game-server 0755 root root -"

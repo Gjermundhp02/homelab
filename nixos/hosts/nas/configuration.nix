@@ -17,15 +17,6 @@
     path = "/home/gjermund/.ssh/id_ed25519";
   };
 
-  sops.secrets.minecraft = {
-    sopsFile = ./secrets/minecraft.env;
-    format = "dotenv";
-  };
-
-  sops.secrets.playit = {
-    sopsFile = ./secrets/game-server.yaml;
-  };
-
   swapDevices = [
     {
       device = "/swapfile";

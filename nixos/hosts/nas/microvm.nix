@@ -10,7 +10,7 @@
   networking.nat = {
     enable = true;
     externalInterface = "wlp1s0";
-    internalInterfaces = [ "microbr0" ];
+    internalInterfaces = ["microbr0" "eno1"];
     forwardPorts = [
       {
         sourcePort = 25565;
@@ -22,14 +22,18 @@
 
   networking.firewall = {
     enable = true;
-    trustedInterfaces = [ "tailscale0" ];
-    allowedTCPPorts = [ 25565 ];
+    trustedInterfaces = ["tailscale0"];
+    allowedTCPPorts = [25565];
     extraForwardRules = ''
-      # Wi-Fi <-> VM Bridge
+      # VM bridge -> internet
       iifname "microbr0" oifname "wlp1s0" accept
       iifname "wlp1s0" oifname "microbr0" ct state established,related accept
 
-      # Tailscale <-> VM Bridge
+      # device on eno1 -> internet
+      iifname "eno1" oifname "wlp1s0" accept
+      iifname "wlp1s0" oifname "eno1" ct state established,related accept
+
+      # Tailscale -> VM network
       iifname "tailscale0" oifname "microbr0" accept
       iifname "microbr0" oifname "tailscale0" ct state established,related accept
     '';
@@ -74,6 +78,15 @@
     matchConfig.Name = "vm-game";
     networkConfig = {
       Bridge = "microbr0";
+    };
+  };
+
+  networking.networkmanager.unmanaged = [ "eno1" ];
+
+  systemd.network.networks."10-eno1" = {
+    matchConfig.Name = "eno1";
+    networkConfig = {
+      Address = ["192.168.101.1/24"];
     };
   };
 }

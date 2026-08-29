@@ -2,4 +2,4 @@
 .terraform/
 terraform.tfstate*
 *id_ed25519
-!nixos/hosts/nas/secrets/*.env
+!nixos/hosts/nas/secrets/**/*\.env
