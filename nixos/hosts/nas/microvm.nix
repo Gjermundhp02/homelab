@@ -1,90 +1,79 @@
-{ config, ... }:
+{...}: {
+  imports = [
+    ./microvm/immich.nix
+    ./microvm/game-server.nix
+  ];
+  networking.useNetworkd = true;
 
-let
-  immichSecretsPath = config.sops.secrets.immich.path;
-in
-{
-  sops.secrets.immich = {};
-  # Configure host networking/bridge for the VMs if needed
-  networking.bridges.microbr0.interfaces = [ "vm-web" ];
-  networking.interfaces.microbr0.ipv4.addresses = [{
-    address = "192.168.100.1";
-    prefixLength = 24;
-  }];
+  systemd.network.enable = true;
 
-  # Declarative MicroVM definitions
-  microvm.vms = {
-    immich = {
-      # Keep the VM auto-starting with systemd on boot
-      autostart = true;
+  networking.nat = {
+    enable = true;
+    externalInterface = "wlp1s0";
+    internalInterfaces = [ "microbr0" ];
+    forwardPorts = [
+      {
+        sourcePort = 25565;
+        destination = "192.168.100.20:25565";
+        proto = "tcp";
+      }
+    ];
+  };
 
-      # The NixOS configuration inside the guest VM
-      config = { ... }: {
-        # Import microvm guest capabilities inside the guest block
-        microvm = {
-          hypervisor = "cloud-hypervisor"; # "qemu", "cloud-hypervisor", "firecracker", "crosvm"
-          vsock.cid = 3;
-          vcpu = 2;
-          mem = 2048; # MB
+  networking.firewall = {
+    enable = true;
+    trustedInterfaces = [ "tailscale0" ];
+    allowedTCPPorts = [ 25565 ];
+    extraForwardRules = ''
+      # Wi-Fi <-> VM Bridge
+      iifname "microbr0" oifname "wlp1s0" accept
+      iifname "wlp1s0" oifname "microbr0" ct state established,related accept
 
-          # Persistent storage shared from host via virtiofs
-          shares = [
-            {
-              proto = "virtiofs";
-              tag = "ro-store";
-              source = "/nix/store";
-              mountPoint = "/nix/.ro-store";
-            }
-            {
-              proto = "virtiofs";
-              tag = "secrets";
-              source = "/run/secrets";
-              mountPoint = "/run/secrets";
-            }
-            {
-              proto = "virtiofs";
-              tag = "data";
-              source = "/var/lib/microvms/immich/data";
-              mountPoint = "/var/data";
-            }
-          ];
+      # Tailscale <-> VM Bridge
+      iifname "tailscale0" oifname "microbr0" accept
+      iifname "microbr0" oifname "tailscale0" ct state established,related accept
+    '';
+  };
 
-          # Attach guest interface to the host bridge
-          interfaces = [
-            {
-              type = "tap";
-              id = "vm-web";
-              mac = "02:00:00:00:00:01";
-            }
-          ];
-        };
+  # Direct NAT rule for incoming Tailscale traffic
+  networking.nftables = {
+    enable = true;
+    tables.tailscale-dnat = {
+      family = "ip";
+      content = ''
+        chain prerouting {
+          type nat hook prerouting priority dstnat; policy accept;
+          iifname "tailscale0" tcp dport 25565 dnat to 192.168.100.20:25565
+        }
+      '';
+    };
+  };
 
-        # Standard Guest NixOS options
-        system.stateVersion = "26.05";
-        networking.hostName = "immich";
+  systemd.network.netdevs."10-microbr0" = {
+    netdevConfig = {
+      Name = "microbr0";
+      Kind = "bridge";
+    };
+  };
 
-        # Networking inside guest
-        networking.interfaces.eth0.ipv4.addresses = [{
-          address = "192.168.100.10";
-          prefixLength = 24;
-        }];
-        networking.defaultGateway = {
-          address = "192.168.100.1";
-          interface = "eth0";
-        };
+  systemd.network.networks."10-microbr0" = {
+    matchConfig.Name = "microbr0";
+    networkConfig = {
+      Address = ["192.168.100.1/24"];
+    };
+  };
 
-        services.immich = {
-          enable = true;
-          host = "0.0.0.0";
-          openFirewall = true;
-          secretsFile = immichSecretsPath;
-        };
+  systemd.network.networks."10-vm-web" = {
+    matchConfig.Name = "vm-web";
+    networkConfig = {
+      Bridge = "microbr0";
+    };
+  };
 
-        services.openssh = {
-          enable = true;
-          settings.PermitRootLogin = "yes";
-        };
-      };
+  systemd.network.networks."10-vm-game" = {
+    matchConfig.Name = "vm-game";
+    networkConfig = {
+      Bridge = "microbr0";
     };
   };
 }

@@ -19,7 +19,7 @@
     nixarr,
     microvm,
     ...
-  }: {
+  }@inputs: {
     nixosConfigurations = let
       # Fetch all of the directories in the hosts folder
       hosts = builtins.attrNames (nixpkgs.lib.filterAttrs (n: t: t == "directory") (builtins.readDir ./hosts));
@@ -33,6 +33,7 @@
             system = "x86_64-linux";
             specialArgs = {
               inherit host;
+              inherit inputs;
             };
             modules = [
               disko.nixosModules.disko

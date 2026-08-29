@@ -1,7 +1,4 @@
-{
-  config,
-  ...
-}: {
+{config, ...}: {
   imports = [
     ./hardware-configuration.nix
     ./arrstack.nix
@@ -14,6 +11,27 @@
   # This is the actual specification of the secrets.
   sops.secrets."wireguard/private_key" = {};
   sops.secrets.protonvpn = {};
+  sops.secrets.ssh = {
+    owner = "gjermund";
+    mode = "0400";
+    path = "/home/gjermund/.ssh/id_ed25519";
+  };
+
+  sops.secrets.minecraft = {
+    sopsFile = ./secrets/minecraft.env;
+    format = "dotenv";
+  };
+
+  sops.secrets.playit = {
+    sopsFile = ./secrets/game-server.yaml;
+  };
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16 * 1024;
+    }
+  ];
 
   systemd.tmpfiles.settings = {
     "10-mypackage" = {
@@ -21,6 +39,15 @@
         "/nfs/proxmox" = {
           group = "users";
           user = "nixos";
+        };
+      };
+    };
+    "20-gjermund-ssh" = {
+      d = {
+        "/home/gjermund/.ssh" = {
+          user = "gjermund";
+          group = "users";
+          mode = "0700";
         };
       };
     };
@@ -34,27 +61,27 @@
     '';
   };
 
-  networking.wireguard.interfaces = {
-    wg1 = {
-      ips = ["10.50.0.1/24"];
-      listenPort = 51820;
+  # networking.wireguard.interfaces = {
+  #   wg1 = {
+  #     ips = ["10.50.0.1/24"];
+  #     listenPort = 51820;
 
-      privateKeyFile = config.sops.secrets."wireguard/private_key".path;
+  #     privateKeyFile = config.sops.secrets."wireguard/private_key".path;
 
-      peers = [
-        {
-          # Proxmox node
-          publicKey = "CMY4RuvynPyXhRvSPKAt83HYdLGFarc382pjvUtWGCo=";
-          allowedIPs = ["10.50.0.2/32"];
-        }
-      ];
-    };
-  };
+  #     peers = [
+  #       {
+  #         # Proxmox node
+  #         publicKey = "CMY4RuvynPyXhRvSPKAt83HYdLGFarc382pjvUtWGCo=";
+  #         allowedIPs = ["10.50.0.2/32"];
+  #       }
+  #     ];
+  #   };
+  # };
 
-  networking.firewall = {
-    allowedUDPPorts = [2049 51820 ];
-    allowedTCPPorts = [2049];
-  };
+  # networking.firewall = {
+  #   allowedUDPPorts = [2049 51820 ];
+  #   allowedTCPPorts = [2049];
+  # };
 
   # From generated configuration.nix
   networking.networkmanager.enable = true;
@@ -86,6 +113,7 @@
   # Configure console keymap
   console.keyMap = "no";
   users.users.gjermund = {
-    extraGroups = [ "networkmanager" ];
+    createHome = true;
+    extraGroups = ["networkmanager"];
   };
 }

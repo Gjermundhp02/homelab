@@ -13,7 +13,7 @@
       openssh.authorizedKeys.keys = let
       authorizedKeys = builtins.fetchurl {
         url = "https://github.com/gjermundhp02.keys";
-        sha256 = "sha256:0kaccm41fyjy84mxr8c207df817ci8h78ka0fx8l97y6qhlhxxfr";
+        sha256 = "sha256:0ysbal2gyixcd3lbj2r41bf273rinnvdhxm6k7q70h72wkfribgc";
       };
     in
       pkgs.lib.splitString "\n" (builtins.readFile authorizedKeys);

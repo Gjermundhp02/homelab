@@ -7,7 +7,7 @@ keys:
   - &admin_yubikey age1yubikey1qdtk0vwvwv0pd23h4z30l73ynzslggyueknfgwpfqh2td6wt2mwe6xx0wxl
   - &server_nas age1elxnh8kmrsr2g6vqueuvhynxscnww6sf0pqxphe6jlukmlv253tqgrwawt
 creation_rules:
-  - path_regex: hosts/nas/secrets/[^/]+\.yaml$
+  - path_regex: hosts/nas/secrets/[^/]+\.(yaml|env)$
     key_groups:
     - age:
       - *server_nas
