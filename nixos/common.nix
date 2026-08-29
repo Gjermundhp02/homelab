@@ -1,7 +1,4 @@
 {host, pkgs, ...}: {
-  imports = [
-    ./disk-config.nix
-  ];
   nix.settings.experimental-features = ["nix-command" "flakes"];
   networking.hostName = host;
   services.openssh.enable = true;

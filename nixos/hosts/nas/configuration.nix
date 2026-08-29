@@ -1,6 +1,7 @@
 {config, ...}: {
   imports = [
     ./hardware-configuration.nix
+    ../disk-config.nix
     ./arrstack.nix
     ./microvm.nix
   ];
