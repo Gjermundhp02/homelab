@@ -2,7 +2,16 @@
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
+    ./microvm.nix
   ];
+
+  sops.defaultSopsFile = ./secrets/secrets.yaml;
+  sops.age.sshKeyPaths = ["/id_ed25519"];
+  sops.secrets.ssh = {
+    owner = "gjermund";
+    mode = "0400";
+    path = "/home/gjermund/.ssh/id_ed25519";
+  };
 
   swapDevices = [
     {
@@ -28,13 +37,6 @@
   # From generated configuration.nix
   networking.useNetworkd = true;
   systemd.network.enable = true;
-  systemd.network.networks."10-enp2s0" = {
-    matchConfig.Name = "enp2s0";
-    networkConfig = {
-      Address = [ "192.168.101.2/24" ];
-      Gateway = "192.168.101.1";
-    };
-  };
 
   # Set your time zone.
   time.timeZone = "Europe/Oslo";
