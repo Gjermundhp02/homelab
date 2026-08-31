@@ -105,8 +105,12 @@ in {
 
         services.openssh = {
           enable = true;
-          settings.PermitRootLogin = "yes";
+          settings = {
+            PermitRootLogin = "no";
+            PasswordAuthentication = false;
+          };
         };
+        services.fail2ban.enable = true;
       };
     };
   };

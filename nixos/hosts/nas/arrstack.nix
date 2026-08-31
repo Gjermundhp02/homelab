@@ -75,11 +75,25 @@
 
   networking.nftables.enable = true;
 
+  # Accept tailscale0 traffic before the crowdsec chain (priority filter = 0) can evaluate it.
+  # This ensures crowdsec decisions can never block Tailscale, regardless of what's in the blocklist.
+  networking.nftables.tables.tailscale-crowdsec-bypass = {
+    family = "inet";
+    content = ''
+      chain tailscale-bypass {
+        type filter hook input priority filter - 1; policy accept;
+        iifname "tailscale0" accept;
+      }
+    '';
+  };
+
   # 2. Force tailscaled to use nftables (Critical for clean nftables-only systems)
   # This avoids the "iptables-compat" translation layer issues.
-  systemd.services.tailscaled.serviceConfig.Environment = [
-    "TS_DEBUG_FIREWALL_MODE=nftables"
-  ];
+  systemd.services.tailscaled = {
+    serviceConfig.Environment = [ "TS_DEBUG_FIREWALL_MODE=nftables" ];
+    # Restart tailscaled when nftables reloads so it can re-add its rules
+    partOf = [ "nftables.service" ];
+  };
 
   # 3. Optimization: Prevent systemd from waiting for network online
   # (Optional but recommended for faster boot with VPNs)

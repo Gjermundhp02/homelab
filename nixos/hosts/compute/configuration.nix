@@ -3,6 +3,7 @@
     ./hardware-configuration.nix
     ./disk-config.nix
     ./microvm.nix
+    ./crowdsec.nix  # enable after: cscli bouncers add crowdsec-firewall-bouncer → add key to secrets/secrets.yaml
   ];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;
