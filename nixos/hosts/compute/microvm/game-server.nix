@@ -33,7 +33,7 @@ in {
           hypervisor = "cloud-hypervisor";
           vsock.cid = 3;
           vcpu = 4;
-          mem = 16 * 1024; # MB
+          mem = 24 * 1024; # MB
 
           shares = [
             {
