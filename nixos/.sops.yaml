@@ -6,10 +6,22 @@ keys:
   - &admin_gjermund age10ru5z4p4awgs30l4vy7kcnmt2cze74067vfnfyv7txsvczm89c7qcep4yj
   - &admin_yubikey age1yubikey1qdtk0vwvwv0pd23h4z30l73ynzslggyueknfgwpfqh2td6wt2mwe6xx0wxl
   - &server_nas age1elxnh8kmrsr2g6vqueuvhynxscnww6sf0pqxphe6jlukmlv253tqgrwawt
+  - &server_compute age1dkagcg5zdeply2ls02q3gqd7fy7gpua0r8xlr3gh0m643d7gcamqjxr3up
 creation_rules:
-  - path_regex: hosts/nas/secrets/.*\.(yaml|env)$
+  - path_regex: hosts/compute/.*\.(yaml|env)$
+    key_groups:
+    - age:
+      - *server_compute
+      - *admin_gjermund
+      - *admin_yubikey
+  - path_regex: hosts/nas/.*\.(yaml|env)$
     key_groups:
     - age:
       - *server_nas
+      - *admin_gjermund
+      - *admin_yubikey
+  - path_regex: hosts/.*\.(yaml|env)$
+    key_groups:
+    - age:
       - *admin_gjermund
       - *admin_yubikey
