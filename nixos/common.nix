@@ -1,4 +1,6 @@
-{host, pkgs, ...}: {
+{host, lib, ...}: let
+  gjermundKeys = import ./lib/gjermund-keys.nix {inherit lib;};
+in {
   nix.settings.experimental-features = ["nix-command" "flakes"];
   networking.hostName = host;
   services.openssh = {
@@ -66,17 +68,43 @@
     gjermund = {
       isNormalUser = true;
       extraGroups = ["wheel"];
-      openssh.authorizedKeys.keys = let
-      authorizedKeys = builtins.fetchurl {
-        url = "https://github.com/gjermundhp02.keys";
-        sha256 = "sha256:0ysbal2gyixcd3lbj2r41bf273rinnvdhxm6k7q70h72wkfribgc";
-      };
-    in
-      pkgs.lib.splitString "\n" (builtins.readFile authorizedKeys);
+      openssh.authorizedKeys.keys = gjermundKeys;
     };
   };
   nix.settings.trusted-users = [
     "gjermund"
   ];
+
+  swapDevices = [
+    {
+      device = "/swapfile";
+      size = 16 * 1024;
+    }
+  ];
+
+  time.timeZone = "Europe/Oslo";
+
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "nb_NO.UTF-8";
+    LC_IDENTIFICATION = "nb_NO.UTF-8";
+    LC_MEASUREMENT = "nb_NO.UTF-8";
+    LC_MONETARY = "nb_NO.UTF-8";
+    LC_NAME = "nb_NO.UTF-8";
+    LC_NUMERIC = "nb_NO.UTF-8";
+    LC_PAPER = "nb_NO.UTF-8";
+    LC_TELEPHONE = "nb_NO.UTF-8";
+    LC_TIME = "nb_NO.UTF-8";
+  };
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  services.xserver.xkb = {
+    layout = "no";
+    variant = "";
+  };
+  console.keyMap = "no";
+
   system.stateVersion = "25.11";
 }

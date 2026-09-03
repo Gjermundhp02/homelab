@@ -28,7 +28,9 @@ in {
       autostart = true;
 
       # The NixOS configuration inside the guest VM
-      config = {...}: {
+      config = {lib, ...}: let
+        gjermundKeys = import ../../../lib/gjermund-keys.nix {inherit lib;};
+      in {
         # Import microvm guest capabilities inside the guest block
         microvm = {
           hypervisor = "cloud-hypervisor"; # "qemu", "cloud-hypervisor", "firecracker", "crosvm"
@@ -73,7 +75,7 @@ in {
           gjermund = {
             isNormalUser = true;
             extraGroups = ["wheel"];
-            openssh.authorizedKeys.keys = [(builtins.readFile ../ssh.pub)];
+            openssh.authorizedKeys.keys = gjermundKeys;
           };
         };
         nix.settings.trusted-users = [

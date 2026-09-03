@@ -28,7 +28,9 @@ in {
     game-server = {
       autostart = true;
 
-      config = {...}: {
+      config = {lib, ...}: let
+        gjermundKeys = import ../../../lib/gjermund-keys.nix {inherit lib;};
+      in {
         microvm = {
           hypervisor = "cloud-hypervisor";
           vsock.cid = 3;
@@ -79,7 +81,7 @@ in {
           gjermund = {
             isNormalUser = true;
             extraGroups = ["wheel" "docker"];
-            openssh.authorizedKeys.keys = [(builtins.readFile ../ssh.pub)];
+            openssh.authorizedKeys.keys = gjermundKeys;
           };
         };
         nix.settings.trusted-users = [
