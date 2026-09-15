@@ -17,13 +17,25 @@
     path = "/home/gjermund/.ssh/id_ed25519";
   };
 
-  # Stage-1 initrd unlock from physical USB
+  # Stage-1 initrd unlock from physical USB.
+  # keyFile points at a raw partition on the stick (no filesystem) holding
+  # random key bytes enrolled as a LUKS key slot on each device.
   boot.initrd = {
     kernelModules = [ "uas" "usb_storage" "vfat" ];
 
     luks.devices = {
-      "crypted-root".allowDiscards = true;
-      "crypted-raid".allowDiscards = true;
+      "crypted-root" = {
+        allowDiscards = true;
+        keyFile = "/dev/disk/by-id/usb-VendorCo_ProductCode_1264371230950464243-0:0-part2";
+        keyFileSize = 4096;
+        fallbackToPassword = true;
+      };
+      "crypted-raid" = {
+        allowDiscards = true;
+        keyFile = "/dev/disk/by-id/usb-VendorCo_ProductCode_1264371230950464243-0:0-part2";
+        keyFileSize = 4096;
+        fallbackToPassword = true;
+      };
     };
   };
 
