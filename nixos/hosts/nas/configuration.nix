@@ -5,6 +5,7 @@
     ./arrstack.nix
     ./microvm.nix
     ../crowdsec-bouncer.nix
+    ./monitoring.nix
   ];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;

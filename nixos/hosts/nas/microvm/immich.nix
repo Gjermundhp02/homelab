@@ -31,6 +31,10 @@ in {
       config = {lib, ...}: let
         gjermundKeys = import ../../../lib/gjermund-keys.nix {inherit lib;};
       in {
+        imports = [
+          (import ../../monitoring-agent.nix {lokiUrl = "http://192.168.100.1:3100/loki/api/v1/push";})
+        ];
+
         # Import microvm guest capabilities inside the guest block
         microvm = {
           hypervisor = "cloud-hypervisor"; # "qemu", "cloud-hypervisor", "firecracker", "crosvm"
@@ -113,6 +117,8 @@ in {
           };
         };
         services.fail2ban.enable = true;
+
+        networking.firewall.allowedTCPPorts = [9100];
       };
     };
   };

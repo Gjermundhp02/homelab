@@ -31,6 +31,10 @@ in {
       config = {lib, ...}: let
         gjermundKeys = import ../../../lib/gjermund-keys.nix {inherit lib;};
       in {
+        imports = [
+          (import ../../monitoring-agent.nix {lokiUrl = "http://192.168.101.1:3100/loki/api/v1/push";})
+        ];
+
         microvm = {
           hypervisor = "cloud-hypervisor";
           vsock.cid = 3;
@@ -136,7 +140,7 @@ in {
             };
           };
         };
-        networking.firewall.allowedTCPPorts = [25565 25575];
+        networking.firewall.allowedTCPPorts = [25565 25575 9100];
 
         services.openssh = {
           enable = true;

@@ -1,0 +1,115 @@
+{
+  "title": "Security overview",
+  "uid": "security-overview",
+  "schemaVersion": 39,
+  "editable": true,
+  "timezone": "browser",
+  "time": {"from": "now-24h", "to": "now"},
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "SSH logins",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{unit=\"sshd.service\"} |~ \"Accepted|Failed|Invalid user\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Console / local sessions",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{unit=\"systemd-logind.service\"} |~ \"New session|Removed session\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "fail2ban bans",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{unit=\"fail2ban.service\"} |~ \"Ban|Unban\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "CrowdSec decisions",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{unit=\"crowdsec.service\"} != \"/v1/heartbeat\" != \"/v1/decisions/stream\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Active CrowdSec bans",
+      "type": "stat",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 24},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "expr": "sum(cs_active_decisions{action=\"ban\"})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "CrowdSec alerts by reason",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "gridPos": {"h": 6, "w": 12, "x": 6, "y": 24},
+      "targets": [
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "expr": "sum by (reason) (increase(cs_alerts[5m]))",
+          "legendFormat": "{{reason}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Active fail2ban bans",
+      "type": "stat",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 24},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({unit=\"fail2ban.service\"} |~ \" Ban \" [$__range])) - sum(count_over_time({unit=\"fail2ban.service\"} |~ \" Unban \" [$__range]))",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
