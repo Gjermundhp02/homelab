@@ -1,4 +1,4 @@
-{...}: {
+{config, ...}: {
   imports = [
     ./hardware-configuration.nix
     ./disk-config.nix
@@ -8,14 +8,43 @@
     ../file-transfer-monitoring.nix
   ];
 
-  networking.firewall.interfaces.microbr0.allowedTCPPorts = [9100 6060];
+  networking.firewall.interfaces.microbr0.allowedTCPPorts = [9100 6060 10250];
+  networking.firewall.interfaces.microbr0.allowedUDPPorts = [8472];
 
   sops.defaultSopsFile = ./secrets/secrets.yaml;
   sops.age.sshKeyPaths = ["/id_ed25519"];
+  sops.secrets.k3s_token = {};
+  sops.secrets.tailscale_key = {};
   sops.secrets.ssh = {
     owner = "gjermund";
     mode = "0400";
     path = "/home/gjermund/.ssh/id_ed25519";
+  };
+
+  # Sole k3s workload node: runs Traefik + its ServiceLB, which binds host
+  # ports 80/443 here (nas is tainted control-plane-only, so nothing on nas
+  # ever competes with this — see nas/configuration.nix).
+  services.k3s = {
+    enable = true;
+    role = "agent";
+    serverAddr = "https://192.168.101.1:6443";
+    tokenFile = config.sops.secrets.k3s_token.path;
+    extraFlags = toString [
+      "--node-ip=192.168.101.2"
+      "--flannel-iface=microbr0"
+    ];
+  };
+
+  # Independent Tailscale identity so the public ingress path (Cloudflare
+  # DNS -> this host's tailscale IP -> Traefik) never depends on nas/Caddy.
+  services.tailscale = {
+    enable = true;
+    authKeyFile = config.sops.secrets.tailscale_key.path;
+  };
+
+  networking.firewall = {
+    trustedInterfaces = ["tailscale0"];
+    allowedUDPPorts = [config.services.tailscale.port];
   };
 
   # Stage-1 initrd unlock from physical USB.
