@@ -5,6 +5,7 @@
     ./microvm.nix
     ../crowdsec-bouncer.nix  # enable after: cscli bouncers add crowdsec-firewall-bouncer → add key to secrets/secrets.yaml
     (import ../monitoring-agent.nix {lokiUrl = "http://192.168.101.1:3100/loki/api/v1/push";})
+    ../file-transfer-monitoring.nix
   ];
 
   networking.firewall.interfaces.microbr0.allowedTCPPorts = [9100 6060];

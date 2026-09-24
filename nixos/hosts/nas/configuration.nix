@@ -5,6 +5,7 @@
     ./arrstack.nix
     ./microvm.nix
     ../crowdsec-bouncer.nix
+    ../file-transfer-monitoring.nix
     ./monitoring.nix
   ];
 

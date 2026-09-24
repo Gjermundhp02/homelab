@@ -1,0 +1,106 @@
+{
+  "title": "USB & file transfers",
+  "uid": "usb-file-transfers",
+  "schemaVersion": 39,
+  "editable": true,
+  "timezone": "browser",
+  "time": {"from": "now-24h", "to": "now"},
+  "refresh": "30s",
+  "panels": [
+    {
+      "id": 1,
+      "title": "USB devices inserted / removed",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 7, "w": 24, "x": 0, "y": 0},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{syslog_identifier=\"usb-monitor\"}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Files read/written/deleted on USB drives (auditd)",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 7},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{unit=\"auditd.service\"} |~ \"key=.usb_files.|name=./mnt/usb|cwd=./mnt/usb\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "SCP / SFTP file transfers",
+      "type": "logs",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 15},
+      "options": {"showTime": true, "sortOrder": "Descending", "wrapLogMessage": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{syslog_identifier=\"internal-sftp\"} |~ \"^open \" | regexp \"open \\\"(?P<path>.*)\\\" flags (?P<flags>[A-Z,]+)\" | line_format \"{{if .user}}{{.user}}{{else}}uid={{.uid}}{{end}} {{if hasPrefix \\\"WRITE\\\" .flags}}wrote to{{else}}read from{{end}} \\\"{{if hasPrefix \\\"/\\\" .path}}{{.path}}{{else}}/home/{{if .user}}{{.user}}{{else}}unknown{{end}}/{{.path}}{{end}}\\\"\"",
+          "refId": "A"
+        },
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{syslog_identifier=\"internal-sftp\"} |~ \"^session opened\" | regexp \"session opened for local user (?P<sessuser>[^ ]+) from (?P<ip>.*)\" | line_format \"connected: {{if .user}}{{.user}}{{else}}{{.sessuser}}{{end}} from {{.ip}}\"",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "USB file events (24h)",
+      "type": "stat",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 23},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({unit=\"auditd.service\"} |~ \"key=.usb_files.\" [$__range]))",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "SCP/SFTP transfers (24h)",
+      "type": "stat",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 23},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({syslog_identifier=\"internal-sftp\"} |~ \"^open \" [$__range]))",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "USB devices inserted (24h)",
+      "type": "stat",
+      "datasource": {"type": "loki", "uid": "loki"},
+      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 23},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum(count_over_time({syslog_identifier=\"usb-monitor\"} |~ \"inserted\" [$__range]))",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}
