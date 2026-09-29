@@ -45,6 +45,12 @@
   networking.firewall.interfaces.eno1.allowedTCPPorts = [6443 10250];
   networking.firewall.interfaces.eno1.allowedUDPPorts = [8472];
 
+  # Pod-originated traffic to ClusterIPs (e.g. CoreDNS/local-path-provisioner/
+  # metrics-server reaching the apiserver Service) arrives on the CNI bridge
+  # and flannel's VXLAN interface, not eno1 — trust them or the default-deny
+  # firewall silently drops it (times out rather than refuses).
+  networking.firewall.trustedInterfaces = ["cni0" "flannel.1"];
+
   environment.systemPackages = [pkgs.kubectl];
 
   systemd.tmpfiles.settings = {

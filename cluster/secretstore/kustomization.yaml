@@ -1,0 +1,7 @@
+# Referenced by clusters/homelab/secretstore.yaml's Flux Kustomization,
+# which dependsOn infra so this only ever applies after the external-secrets
+# HelmRelease has actually installed the ClusterSecretStore CRD.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - clustersecretstore.yaml

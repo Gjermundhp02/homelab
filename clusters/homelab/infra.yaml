@@ -1,11 +1,5 @@
-# OpenBao + External Secrets Operator. Must reconcile before cluster/apps
-# (see apps.yaml's dependsOn) since authentik/external-dns's ExternalSecret
-# CRs need ESO's CRDs — and a working ClusterSecretStore — to exist first.
-#
-# Note: the very first reconcile here can show a transient failure on
-# ClusterSecretStore itself (its own CRD, from the external-secrets
-# HelmRelease in this same Kustomization, may not have registered yet) —
-# self-heals on retry once the HelmRelease finishes installing.
+# OpenBao + External Secrets Operator (operators only — see secretstore.yaml
+# for the ClusterSecretStore, which depends on this).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

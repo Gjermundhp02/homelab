@@ -1,6 +1,9 @@
-# Referenced by clusters/homelab/infra.yaml's Flux Kustomization. Must
-# reconcile (and its HelmReleases actually install, CRDs included) before
-# cluster/apps — see clusters/homelab/apps.yaml's dependsOn.
+# Referenced by clusters/homelab/infra.yaml's Flux Kustomization. Operators
+# only — NOT clustersecretstore.yaml (see cluster/secretstore/), because
+# kustomize-controller dry-runs the *entire* batch before applying anything,
+# and ClusterSecretStore's CRD doesn't exist until external-secrets' own
+# HelmRelease (right here in this same batch) actually installs it — mixing
+# them deadlocks the whole Kustomization permanently, it does not self-heal.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -11,4 +14,3 @@ resources:
   - external-secrets/helmrepository.yaml
   - external-secrets/helmrelease.yaml
   - external-secrets/serviceaccount.yaml
-  - external-secrets/clustersecretstore.yaml

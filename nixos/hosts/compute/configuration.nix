@@ -43,7 +43,10 @@
   };
 
   networking.firewall = {
-    trustedInterfaces = ["tailscale0"];
+    # cni0/flannel.1: same reasoning as nas — pod traffic to ClusterIPs
+    # (e.g. authentik reaching CoreDNS/the apiserver) arrives here, not
+    # microbr0, and the default-deny firewall drops it silently otherwise.
+    trustedInterfaces = ["tailscale0" "cni0" "flannel.1"];
     allowedUDPPorts = [config.services.tailscale.port];
   };
 
