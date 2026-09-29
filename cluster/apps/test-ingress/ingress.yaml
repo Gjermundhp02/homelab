@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: whoami
   namespace: default
+  annotations:
+    # placeholder — update once compute joins Tailscale (see cluster/authentik/helmchart.yaml)
+    external-dns.kubernetes.io/target: "100.117.83.4"
 spec:
   rules:
     - host: k3s-test.hpedersen.no

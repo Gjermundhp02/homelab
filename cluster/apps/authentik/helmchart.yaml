@@ -1,0 +1,30 @@
+# Installed via k3s's built-in helm-controller (kind: HelmChart) so this
+# applies the same way as cluster/test-ingress — `kubectl apply -f` — with
+# no local Helm CLI needed. See secret.example.yaml for the values it pulls
+# authentik.secret_key and the postgres password from.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: authentik
+  namespace: kube-system
+spec:
+  repo: https://charts.goauthentik.io
+  chart: authentik
+  targetNamespace: authentik
+  createNamespace: true
+  valuesContent: |-
+    postgresql:
+      enabled: true
+    server:
+      ingress:
+        enabled: true
+        ingressClassName: traefik
+        hosts:
+          - authentik.hpedersen.no
+        annotations:
+          # placeholder — update once compute joins Tailscale (see cluster/test-ingress/ingress.yaml)
+          external-dns.kubernetes.io/target: "100.117.83.4"
+  valuesSecrets:
+    - name: authentik-values
+      keys:
+        - values.yaml

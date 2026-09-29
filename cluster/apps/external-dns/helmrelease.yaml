@@ -1,0 +1,35 @@
+# Manages Cloudflare DNS from in-cluster Ingress hosts (k3s-test, authentik).
+# Only the `ingress` source is enabled — it won't touch plain Services.
+# Each managed Ingress carries an `external-dns.kubernetes.io/target`
+# annotation pointing at compute's Tailscale IP, since Traefik's ServiceLB
+# would otherwise report compute's LAN IP as the Ingress address.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: external-dns
+  namespace: external-dns
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: external-dns
+      sourceRef:
+        kind: HelmRepository
+        name: external-dns
+      interval: 30m
+  values:
+    provider:
+      name: cloudflare
+    env:
+      - name: CF_API_TOKEN
+        valueFrom:
+          secretKeyRef:
+            name: external-dns-cloudflare
+            key: cloudflare_api_token
+    sources:
+      - ingress
+    policy: sync
+    registry: txt
+    txtOwnerId: homelab-k3s
+    domainFilters:
+      - hpedersen.no

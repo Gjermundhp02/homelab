@@ -3,3 +3,5 @@
 terraform.tfstate*
 *id_ed25519
 !nixos/hosts/**/secrets/**/*\.env
+cluster/apps/authentik/secret.yaml
+cluster/apps/external-dns/secret.yaml

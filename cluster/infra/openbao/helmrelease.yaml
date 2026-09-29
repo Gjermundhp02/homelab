@@ -1,0 +1,33 @@
+# Single-instance OpenBao (standalone mode, PVC-backed storage via the
+# cluster's default local-path StorageClass) as the homelab's secrets
+# source of truth. External Secrets Operator (cluster/external-secrets)
+# reads from it and materializes the Secrets that authentik/external-dns
+# already consume.
+#
+# NOT auto-unsealed: after every OpenBao pod restart it starts sealed and
+# needs `bao operator unseal` run by hand with the unseal keys from the
+# one-time `bao operator init`. Acceptable tradeoff for a single homelab
+# instance — auto-unseal needs an external KMS/Transit seal this cluster
+# doesn't have a sane candidate for.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: openbao
+  namespace: openbao
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: openbao
+      sourceRef:
+        kind: HelmRepository
+        name: openbao
+      interval: 30m
+  values:
+    injector:
+      enabled: false
+    server:
+      dataStorage:
+        enabled: true
+    ui:
+      enabled: true
